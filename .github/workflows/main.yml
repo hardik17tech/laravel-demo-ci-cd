@@ -115,7 +115,6 @@ jobs:
           npm install
           npm run build
 
-      # Install sshpass on runner
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
