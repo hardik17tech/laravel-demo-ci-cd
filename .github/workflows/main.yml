@@ -30,7 +30,12 @@
 #             cd ${{ secrets.APP_PATH }}
 #             ./build.sh
 
-name: Deploy Laravel App
+
+
+
+
+
+name: Demo Laravel App
 
 on:
   push:
@@ -42,17 +47,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.3
+          extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
 
       - name: Install Composer dependencies
         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
-      - name: Setup Node.js and build assets
+      - name: Build Frontend
         uses: actions/setup-node@v3
         with:
           node-version: 18
@@ -60,29 +66,20 @@ jobs:
           npm install
           npm run build
 
-      - name: Deploy to server via SSH
-        uses: appleboy/ssh-action@v1.0.3
+      # Deploy to server via SSH & Rsync
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
+          host: 10.10.20.41
+          username: dev
+          password: ${{ secrets.SERVER_PASSWORD }} 
+          port: 22
           script: |
-            cd ${{ secrets.SERVER_PATH }} || mkdir -p ${{ secrets.SERVER_PATH }} && cd ${{ secrets.SERVER_PATH }}
-
-            # first-time setup: clone repo
-            if [ ! -d ".git" ]; then
-              git clone https://github.com/${{ github.repository }} . 
-            else
-              git reset --hard
-              git pull origin main
-            fi
-
+            cd /var/www/html/laravel-demo
+            git pull origin main || true
             composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-
-            # restart PHP (adjust for your OS)
-            sudo systemctl restart php8.1-fpm || true
+            sudo systemctl restart php8.3-fpm || true
