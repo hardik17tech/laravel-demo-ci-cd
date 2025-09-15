@@ -1,31 +1,31 @@
-# name: Demo laravel app
+name: Demo laravel app
 
-# on:
-#   push:
-#     branches: 
+on:
+  push:
+    branches: [ main ]
 
-# jobs:
-#   build:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v4
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-#       - name: Setup PHP
-#         uses: shivammathur/setup-php@v2
-#         with:
-#           php-version: 8.3
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
  
-#       - name: Install app
-#         run: composer install
+      - name: Install app
+        run: composer install
  
-#       - name: Deploy using ssh
-#         uses: appleboy/ssh-action@v1.1.0
-#         with:
-#           host: ${{ secrets.SSH_HOST }}
-#           username: ${{ secrets.SSH_USERNAME }}
-#           # key: ${{ secrets.SSH_PRIVATE_KEY }}
-#           password: ${{ secrets.SSH_PASSWORD }}
-#           script: |
-#             cd ${{ secrets.APP_PATH }}
-#             ./build.sh
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          # key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: |
+            cd ${{ secrets.APP_PATH }}
+            ./build.sh
