@@ -124,7 +124,7 @@ jobs:
             ssh -tt -p 22 -o StrictHostKeyChecking=no \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
               cd /var/www/html/laravel-demo
-              git pull origin main || true
+              sudo git pull origin main || true
               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
               php artisan migrate --force
               php artisan config:cache
