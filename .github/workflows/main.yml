@@ -1,12 +1,50 @@
-# name: Demo laravel app
+# # name: Demo laravel app
+
+# # on:
+# #   push:
+# #     branches: [ main ]
+
+# # jobs:
+# #   build:
+# #     runs-on: ubuntu-latest
+# #     steps:
+# #       - name: Checkout code
+# #         uses: actions/checkout@v4
+
+# #       - name: Setup PHP
+# #         uses: shivammathur/setup-php@v2
+# #         with:
+# #           php-version: 8.3
+ 
+# #       - name: Install app
+# #         run: composer install
+ 
+# #       - name: Deploy using ssh
+# #         uses: appleboy/ssh-action@v1.1.0
+# #         with:
+# #           host: ${{ secrets.SSH_HOST }}
+# #           username: ${{ secrets.SSH_USERNAME }}
+# #           # key: ${{ secrets.SSH_PRIVATE_KEY }}
+# #           password: ${{ secrets.SSH_PASSWORD }}
+# #           script: |
+# #             cd ${{ secrets.APP_PATH }}
+# #             ./build.sh
+
+
+
+
+
+
+# name: Demo Laravel App
 
 # on:
 #   push:
 #     branches: [ main ]
 
 # jobs:
-#   build:
+#   deploy:
 #     runs-on: ubuntu-latest
+
 #     steps:
 #       - name: Checkout code
 #         uses: actions/checkout@v4
@@ -14,25 +52,36 @@
 #       - name: Setup PHP
 #         uses: shivammathur/setup-php@v2
 #         with:
-#           php-version: 8.3
- 
-#       - name: Install app
-#         run: composer install
- 
-#       - name: Deploy using ssh
-#         uses: appleboy/ssh-action@v1.1.0
+#           php-version: 8.2
+#           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
+
+#       - name: Install Composer dependencies
+#         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+#       - name: Build Frontend
+#         uses: actions/setup-node@v3
 #         with:
-#           host: ${{ secrets.SSH_HOST }}
-#           username: ${{ secrets.SSH_USERNAME }}
-#           # key: ${{ secrets.SSH_PRIVATE_KEY }}
-#           password: ${{ secrets.SSH_PASSWORD }}
+#           node-version: 18
+#       - run: |
+#           npm install
+#           npm run build
+
+#       - name: Deploy to Server
+#         uses: appleboy/ssh-action@v1.2.0
+#         with:
+#           host: 10.10.20.41
+#           username: dev
+#           password: ${{ secrets.SERVER_PASSWORD }} 
+#           port: 22
 #           script: |
-#             cd ${{ secrets.APP_PATH }}
-#             ./build.sh
-
-
-
-
+#             cd /var/www/html/laravel-demo
+#             git pull origin main || true
+#             composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+#             php artisan migrate --force
+#             php artisan config:cache
+#             php artisan route:cache
+#             php artisan view:cache
+#             sudo systemctl restart php8.3-fpm || true
 
 
 name: Demo Laravel App
@@ -52,7 +101,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.2
           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
 
       - name: Install Composer dependencies
@@ -66,15 +115,14 @@ jobs:
           npm install
           npm run build
 
-      # Deploy to server via SSH & Rsync
+      # # Install sshpass on runner
+      # - name: Install sshpass
+      #   run: sudo apt-get update && sudo apt-get install -y sshpass
+
+      # Deploy using sshpass + ssh
       - name: Deploy to Server
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: 10.10.20.41
-          username: dev
-          password: ${{ secrets.SERVER_PASSWORD }} 
-          port: 22
-          script: |
+        run: |
+          sshpass -p "${{ secrets.SERVER_PASS }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
             cd /var/www/html/laravel-demo
             git pull origin main || true
             composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
@@ -83,3 +131,4 @@ jobs:
             php artisan route:cache
             php artisan view:cache
             sudo systemctl restart php8.3-fpm || true
+          EOF
