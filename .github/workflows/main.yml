@@ -118,10 +118,10 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Deploy to Server (SSH on port 443)
+      - name: Deploy to Server (SSH on port 22)
         run: |
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-            ssh -tt -p 443 -o StrictHostKeyChecking=no \
+            ssh -tt -p 22 -o StrictHostKeyChecking=no \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
               cd /var/www/html/laravel-demo
               git pull origin main || true
