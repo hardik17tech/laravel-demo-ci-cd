@@ -57,7 +57,7 @@ jobs:
         with:
           node-version: 18
       - run: |
-          npm ci
+          npm install
           npm run build
 
       - name: Deploy to server via SSH
