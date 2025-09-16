@@ -168,21 +168,39 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
       
-      - name: Test SSH Connection
-        run: |
-          sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-            ssh -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo ✅ SSH connection successful"
+      # - name: Test SSH Connection
+      #   run: |
+      #     sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
+      #       ssh -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
+      #       ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo ✅ SSH connection successful"
 
 
-      - name: Deploy to Server
+      # - name: Deploy to Server
+      #   run: |
+      #     sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -tt \
+      #       -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
+      #       ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+      #         cd /var/www/html/laravel-demo
+
+      #         git pull origin main
+
+      #         php artisan migrate --force
+      #         php artisan config:cache
+      #         php artisan route:cache
+      #         php artisan view:cache
+
+      #         sudo systemctl restart php8.3-fpm
+      #     EOF
+      - name: Deploy Application
         run: |
-          sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -tt \
-            -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+          sshpass -p "Dev@123" ssh -tt \
+            -p 22 -o StrictHostKeyChecking=no \
+            dev@10.10.20.41 << 'EOF'
               cd /var/www/html/laravel-demo
 
               git pull origin main
+
+              composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
               php artisan migrate --force
               php artisan config:cache
