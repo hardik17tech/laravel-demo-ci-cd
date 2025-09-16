@@ -118,21 +118,23 @@ jobs:
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Deploy to Server (SSH on port 22)
+      # - name: Deploy to Server (SSH on port 22)
+      #   run: |
+      #     sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
+      #       ssh -tt -p 22 -o StrictHostKeyChecking=no \
+      #       ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+      #         cd /var/www/html/laravel-demo
+      #         sudo git pull origin main || true
+      #         composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+      #         php artisan migrate --force
+      #         php artisan config:cache
+      #         php artisan route:cache
+      #         php artisan view:cache
+      #         sudo systemctl restart php8.3-fpm || true
+      #     EOF
+      - name: Deploy to Server
         run: |
-          sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-            ssh -tt -p 22 -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-              cd /var/www/html/laravel-demo
-              sudo git pull origin main || true
-              composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-              php artisan migrate --force
-              php artisan config:cache
-              php artisan route:cache
-              php artisan view:cache
-              sudo systemctl restart php8.3-fpm || true
-          EOF
-
+          sshpass -p "${{ secrets.SERVER_PASS }}" ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /var/www/html/laravel-demo && git pull && php artisan migrate --force"
 
 
 
