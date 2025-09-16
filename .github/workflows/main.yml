@@ -170,23 +170,17 @@ jobs:
 
       - name: Deploy to Server
         run: |
-          for i in {1..3}; do
-            sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-              ssh -tt -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
-              ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF' && break || sleep 10
-                cd /var/www/html/laravel-demo || exit 1
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -tt \
+            -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+              cd /var/www/html/laravel-demo
 
-                git pull origin main || true
+              git pull origin main
 
-                composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+              php artisan migrate --force
+              php artisan config:cache
+              php artisan route:cache
+              php artisan view:cache
 
-                if [ -f artisan ]; then
-                  php artisan migrate --force || true
-                  php artisan config:cache || true
-                  php artisan route:cache || true
-                  php artisan view:cache || true
-                fi
-
-                sudo systemctl restart php8.3-fpm || true
+              sudo systemctl restart php8.3-fpm
           EOF
-          done
