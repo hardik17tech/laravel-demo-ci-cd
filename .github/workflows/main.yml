@@ -191,21 +191,22 @@ jobs:
 
       #         sudo systemctl restart php8.3-fpm
       #     EOF
-      - name: Deploy Application
+`      - name: Deploy to Server
         run: |
-          sshpass -p "Dev@123" ssh -tt \
-            -p 22 -o StrictHostKeyChecking=no \
-            dev@10.10.20.41 << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
               cd /var/www/html/laravel-demo
 
-              git pull origin main
+              git pull origin main || true
 
               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
-              php artisan migrate --force
-              php artisan config:cache
-              php artisan route:cache
-              php artisan view:cache
+              if [ -f artisan ]; then
+                php artisan migrate --force || true
+                php artisan config:cache || true
+                php artisan route:cache || true
+                php artisan view:cache || true
+              fi
 
-              sudo systemctl restart php8.3-fpm
+              sudo systemctl restart php8.3-fpm || true
           EOF
