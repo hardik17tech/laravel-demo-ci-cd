@@ -35,6 +35,55 @@
 
 
 
+# name: Demo Laravel App
+
+# on:
+#   push:
+#     branches: [ main ]
+
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Setup PHP
+#         uses: shivammathur/setup-php@v2
+#         with:
+#           php-version: 8.2
+#           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
+
+#       - name: Install Composer dependencies
+#         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+#       - name: Build Frontend
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 18
+#       - run: |
+#           npm install
+#           npm run build
+
+#       - name: Deploy to Server
+#         uses: appleboy/ssh-action@v1.2.0
+#         with:
+#           host: 10.10.20.41
+#           username: dev
+#           password: Dev@123
+#           port: 22
+#           script: |
+#             cd /var/www/html/laravel-demo
+#             git pull origin main || true
+#             composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+#             php artisan migrate --force
+#             php artisan config:cache
+#             php artisan route:cache
+#             php artisan view:cache
+#             sudo systemctl restart php8.3-fpm || true
+
+
 name: Demo Laravel App
 
 on:
@@ -66,72 +115,23 @@ jobs:
           npm install
           npm run build
 
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: 10.10.20.41
-          username: dev
-          password: Dev@123
-          port: 22
-          script: |
-            cd /var/www/html/laravel-demo
-            git pull origin main || true
-            composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-            php artisan migrate --force
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
-            sudo systemctl restart php8.3-fpm || true
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
 
-
-# # name: Demo Laravel App
-
-# # on:
-# #   push:
-# #     branches: [ main ]
-
-# # jobs:
-# #   deploy:
-# #     runs-on: ubuntu-latest
-
-# #     steps:
-# #       - name: Checkout code
-# #         uses: actions/checkout@v4
-
-# #       - name: Setup PHP
-# #         uses: shivammathur/setup-php@v2
-# #         with:
-# #           php-version: 8.2
-# #           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
-
-# #       - name: Install Composer dependencies
-# #         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-
-# #       - name: Build Frontend
-# #         uses: actions/setup-node@v3
-# #         with:
-# #           node-version: 18
-# #       - run: |
-# #           npm install
-# #           npm run build
-
-# #       - name: Install sshpass
-# #         run: sudo apt-get update && sudo apt-get install -y sshpass
-
-# #       - name: Deploy to Server (SSH on port 22)
-# #         run: |
-# #           sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-# #             ssh -tt -p 22 -o StrictHostKeyChecking=no \
-# #             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-# #               cd /var/www/html/laravel-demo
-# #               sudo git pull origin main || true
-# #               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-# #               php artisan migrate --force
-# #               php artisan config:cache
-# #               php artisan route:cache
-# #               php artisan view:cache
-# #               sudo systemctl restart php8.3-fpm || true
-# #           EOF
+      - name: Deploy to Server (SSH on port 22)
+        run: |
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
+            ssh -tt -p 22 -o StrictHostKeyChecking=no \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+              cd /var/www/html/laravel-demo
+              sudo git pull origin main || true
+              composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+              php artisan migrate --force
+              php artisan config:cache
+              php artisan route:cache
+              php artisan view:cache
+              sudo systemctl restart php8.3-fpm || true
+          EOF
 
 
 
