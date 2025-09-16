@@ -1,12 +1,50 @@
-# # name: Demo laravel app
+# # # name: Demo laravel app
+
+# # # on:
+# # #   push:
+# # #     branches: [ main ]
+
+# # # jobs:
+# # #   build:
+# # #     runs-on: ubuntu-latest
+# # #     steps:
+# # #       - name: Checkout code
+# # #         uses: actions/checkout@v4
+
+# # #       - name: Setup PHP
+# # #         uses: shivammathur/setup-php@v2
+# # #         with:
+# # #           php-version: 8.3
+ 
+# # #       - name: Install app
+# # #         run: composer install
+ 
+# # #       - name: Deploy using ssh
+# # #         uses: appleboy/ssh-action@v1.1.0
+# # #         with:
+# # #           host: ${{ secrets.SSH_HOST }}
+# # #           username: ${{ secrets.SSH_USERNAME }}
+# # #           # key: ${{ secrets.SSH_PRIVATE_KEY }}
+# # #           password: ${{ secrets.SSH_PASSWORD }}
+# # #           script: |
+# # #             cd ${{ secrets.APP_PATH }}
+# # #             ./build.sh
+
+
+
+
+
+
+# # name: Demo Laravel App
 
 # # on:
 # #   push:
 # #     branches: [ main ]
 
 # # jobs:
-# #   build:
+# #   deploy:
 # #     runs-on: ubuntu-latest
+
 # #     steps:
 # #       - name: Checkout code
 # #         uses: actions/checkout@v4
@@ -14,74 +52,86 @@
 # #       - name: Setup PHP
 # #         uses: shivammathur/setup-php@v2
 # #         with:
-# #           php-version: 8.3
- 
-# #       - name: Install app
-# #         run: composer install
- 
-# #       - name: Deploy using ssh
-# #         uses: appleboy/ssh-action@v1.1.0
+# #           php-version: 8.2
+# #           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
+
+# #       - name: Install Composer dependencies
+# #         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+# #       - name: Build Frontend
+# #         uses: actions/setup-node@v3
 # #         with:
-# #           host: ${{ secrets.SSH_HOST }}
-# #           username: ${{ secrets.SSH_USERNAME }}
-# #           # key: ${{ secrets.SSH_PRIVATE_KEY }}
-# #           password: ${{ secrets.SSH_PASSWORD }}
+# #           node-version: 18
+# #       - run: |
+# #           npm install
+# #           npm run build
+
+# #       - name: Deploy to Server
+# #         uses: appleboy/ssh-action@v1.2.0
+# #         with:
+# #           host: 10.10.20.41
+# #           username: dev
+# #           password: ${{ secrets.SERVER_PASSWORD }} 
+# #           port: 22
 # #           script: |
-# #             cd ${{ secrets.APP_PATH }}
-# #             ./build.sh
+# #             cd /var/www/html/laravel-demo
+# #             git pull origin main || true
+# #             composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+# #             php artisan migrate --force
+# #             php artisan config:cache
+# #             php artisan route:cache
+# #             php artisan view:cache
+# #             sudo systemctl restart php8.3-fpm || true
 
 
+# # name: Demo Laravel App
 
+# # on:
+# #   push:
+# #     branches: [ main ]
 
+# # jobs:
+# #   deploy:
+# #     runs-on: ubuntu-latest
 
+# #     steps:
+# #       - name: Checkout code
+# #         uses: actions/checkout@v4
 
-# name: Demo Laravel App
+# #       - name: Setup PHP
+# #         uses: shivammathur/setup-php@v2
+# #         with:
+# #           php-version: 8.2
+# #           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
 
-# on:
-#   push:
-#     branches: [ main ]
+# #       - name: Install Composer dependencies
+# #         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
-# jobs:
-#   deploy:
-#     runs-on: ubuntu-latest
+# #       - name: Build Frontend
+# #         uses: actions/setup-node@v3
+# #         with:
+# #           node-version: 18
+# #       - run: |
+# #           npm install
+# #           npm run build
 
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v4
+# #       - name: Install sshpass
+# #         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-#       - name: Setup PHP
-#         uses: shivammathur/setup-php@v2
-#         with:
-#           php-version: 8.2
-#           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
-
-#       - name: Install Composer dependencies
-#         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-
-#       - name: Build Frontend
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: 18
-#       - run: |
-#           npm install
-#           npm run build
-
-#       - name: Deploy to Server
-#         uses: appleboy/ssh-action@v1.2.0
-#         with:
-#           host: 10.10.20.41
-#           username: dev
-#           password: ${{ secrets.SERVER_PASSWORD }} 
-#           port: 22
-#           script: |
-#             cd /var/www/html/laravel-demo
-#             git pull origin main || true
-#             composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-#             php artisan migrate --force
-#             php artisan config:cache
-#             php artisan route:cache
-#             php artisan view:cache
-#             sudo systemctl restart php8.3-fpm || true
+# #       - name: Deploy to Server (SSH on port 22)
+# #         run: |
+# #           sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
+# #             ssh -tt -p 22 -o StrictHostKeyChecking=no \
+# #             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+# #               cd /var/www/html/laravel-demo
+# #               sudo git pull origin main || true
+# #               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+# #               php artisan migrate --force
+# #               php artisan config:cache
+# #               php artisan route:cache
+# #               php artisan view:cache
+# #               sudo systemctl restart php8.3-fpm || true
+# #           EOF
 
 
 # name: Demo Laravel App
@@ -117,22 +167,49 @@
 
 #       - name: Install sshpass
 #         run: sudo apt-get update && sudo apt-get install -y sshpass
+      
+#       # - name: Test SSH Connection
+#       #   run: |
+#       #     sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
+#       #       ssh -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
+#       #       ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo ✅ SSH connection successful"
 
-#       - name: Deploy to Server (SSH on port 22)
+
+#       # - name: Deploy to Server
+#       #   run: |
+#       #     sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -tt \
+#       #       -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
+#       #       ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
+#       #         cd /var/www/html/laravel-demo
+
+#       #         git pull origin main
+
+#       #         php artisan migrate --force
+#       #         php artisan config:cache
+#       #         php artisan route:cache
+#       #         php artisan view:cache
+
+#       #         sudo systemctl restart php8.3-fpm
+#       #     EOF
+# `      - name: Deploy to Server
 #         run: |
-#           sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-#             ssh -tt -p 22 -o StrictHostKeyChecking=no \
+#           ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
 #             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
 #               cd /var/www/html/laravel-demo
-#               sudo git pull origin main || true
+
+#               git pull origin main || true
+
 #               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-#               php artisan migrate --force
-#               php artisan config:cache
-#               php artisan route:cache
-#               php artisan view:cache
+
+#               if [ -f artisan ]; then
+#                 php artisan migrate --force || true
+#                 php artisan config:cache || true
+#                 php artisan route:cache || true
+#                 php artisan view:cache || true
+#               fi
+
 #               sudo systemctl restart php8.3-fpm || true
 #           EOF
-
 
 name: Demo Laravel App
 
@@ -165,33 +242,16 @@ jobs:
           npm install
           npm run build
 
-      - name: Install sshpass
-        run: sudo apt-get update && sudo apt-get install -y sshpass
-      
-      # - name: Test SSH Connection
-      #   run: |
-      #     sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-      #       ssh -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
-      #       ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "echo ✅ SSH connection successful"
+      # Setup SSH private key
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-
-      # - name: Deploy to Server
-      #   run: |
-      #     sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -tt \
-      #       -p "${{ secrets.SERVER_PORT }}" -o StrictHostKeyChecking=no \
-      #       ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-      #         cd /var/www/html/laravel-demo
-
-      #         git pull origin main
-
-      #         php artisan migrate --force
-      #         php artisan config:cache
-      #         php artisan route:cache
-      #         php artisan view:cache
-
-      #         sudo systemctl restart php8.3-fpm
-      #     EOF
-`      - name: Deploy to Server
+      # Deploy to server
+      - name: Deploy to Server
         run: |
           ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
