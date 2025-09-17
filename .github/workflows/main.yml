@@ -126,7 +126,7 @@ jobs:
               echo "logged in as $(whoami)"
 
               # Ensure target directory exists
-              sudo mkdir -p /var/www/html/laravel-demo
+              sudo mkdir /var/www/html/laravel-demo
               sudo chown  -R $SERVER_USER:$SERVER_USER /var/www/html/laravel-demo
               sudo chmod 0777 /var/www/html/laravel-demo
               cd /var/www/html/laravel-demo || { echo "❌ Directory missing"; exit 1; }
