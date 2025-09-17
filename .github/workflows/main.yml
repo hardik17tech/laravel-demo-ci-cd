@@ -122,8 +122,9 @@ jobs:
         run: |
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
             ssh -p 25025 -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} '
-              cd /var/www/html/laravel-demo && \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} bash -lc '
+              echo "logged in sucess"
+              cd /var/www/html/laravel-demo || { echo "❌ Directory not found"; exit 1; }
               git pull origin main && \
               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader && \
               php artisan migrate --force && \
