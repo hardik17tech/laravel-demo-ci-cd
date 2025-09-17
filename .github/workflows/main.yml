@@ -122,7 +122,7 @@ jobs:
         run: |
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
             ssh -p 25025 -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} '
               cd /var/www/html/laravel-demo && \
               git pull origin main && \
               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader && \
@@ -131,7 +131,7 @@ jobs:
               php artisan route:cache && \
               php artisan view:cache && \
               sudo systemctl restart php8.3-fpm || true
-            "
+            '
 
 
       # - name: Deploy to Server
