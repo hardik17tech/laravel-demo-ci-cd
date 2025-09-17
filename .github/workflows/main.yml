@@ -127,9 +127,9 @@ jobs:
 
               # Ensure target directory exists
               mkdir -p /var/www/html/laravel-demo
+              sudo chown -R $USER:$USER /var/www/html/laravel-demo
               cd /var/www/html/laravel-demo || { echo "❌ Directory missing"; exit 1; }
-
-              cd /var/www/html/laravel-demo || { echo "❌ Directory missing"; exit 1; }
+              
               
               if [ -d ".git" ]; then
                 echo "🔄 Updating existing repo..."
