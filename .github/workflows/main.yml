@@ -135,7 +135,7 @@ jobs:
                 git pull origin main
               else
                 echo "📥 Cloning repo for the first time..."
-                git clone https://github.com/<your-org>/<your-repo>.git .
+                git clone https://github.com/hardik17tech/laravel-demo-ci-cd.git .
               fi
               
               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader && \
