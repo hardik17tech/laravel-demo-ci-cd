@@ -154,6 +154,8 @@ jobs:
 
               echo "✅ Deployment finished!"
               echo "📂 Project deployed to: $(pwd)"
+              ls -la
+
             '
 
 
