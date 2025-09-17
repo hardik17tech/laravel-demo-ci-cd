@@ -126,10 +126,10 @@ jobs:
               echo "logged in as $(whoami)"
 
               # Ensure target directory exists
-              mkdir -p /var/www/html/laravel-demo
+              sudo mkdir -p /var/www/html/laravel-demo
               sudo chown -R $USER:$USER /var/www/html/laravel-demo
               cd /var/www/html/laravel-demo || { echo "❌ Directory missing"; exit 1; }
-              
+
               
               if [ -d ".git" ]; then
                 echo "🔄 Updating existing repo..."
@@ -151,6 +151,9 @@ jobs:
 
               echo "🔄 Restarting PHP-FPM if available..."
               sudo systemctl restart php8.3-fpm || true
+
+              echo "✅ Deployment finished!"
+              echo "📂 Project deployed to: $(pwd)"
             '
 
 
