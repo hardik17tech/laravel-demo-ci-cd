@@ -124,8 +124,20 @@ jobs:
             ssh -p 25025 -o StrictHostKeyChecking=no \
             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} bash -lc '
               echo "logged in sucess"
-              cd /var/www/html/laravel-demo || { echo "❌ Directory not found"; exit 1; }
-              git pull origin main && \
+
+              # Ensure target directory exists
+              mkdir -p /var/www/html/laravel-demo
+              cd /var/www/html/laravel-demo || { echo "❌ Directory missing"; exit 1; }
+              
+              if [ -d ".git" ]; then
+                echo "🔄 Updating existing repo..."
+                git reset --hard
+                git pull origin main
+              else
+                echo "📥 Cloning repo for the first time..."
+                git clone https://github.com/<your-org>/<your-repo>.git .
+              fi
+              
               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader && \
               php artisan migrate --force && \
               php artisan config:cache && \
