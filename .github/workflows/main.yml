@@ -104,23 +104,14 @@ jobs:
           php-version: 8.2
           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
 
-      - name: Build Frontend
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-      - run: |
-          npm install
-          npm run build
-
       - name: Install sshpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
       - name: Deploy to Server (SSH on port 25025)
         run: |
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-            ssh -p 25025 -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} bash -lc '
-              echo "logged in as $(whoami)"
+            ssh -p 25025 -o StrictHostKeyChecking=no dev@202.131.111.118 << 'EOF'
+            echo "log in success" 
 
               # Ensure target directory exists
               sudo mkdir /var/www/html/laravel-demo
