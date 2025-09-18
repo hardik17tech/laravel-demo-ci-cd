@@ -84,9 +84,6 @@ jobs:
           php-version: 8.2
           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
 
-      - name: Install Composer dependencies
-        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-
       - name: Build Frontend
         uses: actions/setup-node@v3
         with:
@@ -111,26 +108,11 @@ jobs:
             git reset --hard
             git pull origin main
             
-            echo "Cloning repo for the first time..."
-            git clone https://github.com/hardik17tech/laravel-demo-ci-cd.git .
-            
-
-            # Always pull the latest changes (safe fallback)
-            git pull origin main || true
-
-            echo "Installing dependencies..."
-            composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-
             echo "Clearing caches..."
             php artisan cache:clear
             php artisan config:clear
             php artisan route:clear
             php artisan view:clear
-
-            echo "Rebuilding caches..."
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
 
             echo "Restarting PHP-FPM..."
             sudo systemctl restart php8.3-fpm || true
