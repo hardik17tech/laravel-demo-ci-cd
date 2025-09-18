@@ -84,73 +84,6 @@
 #             sudo systemctl restart php8.3-fpm || true
 
 
-name: Demo Laravel App
-
-on:
-  push:
-    branches: [ main ]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.2
-          extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
-
-      - name: Install sshpass
-        run: sudo apt-get update && sudo apt-get install -y sshpass
-
-      - name: Deploy to Server (SSH on port 25025)
-        run: |
-          sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-            ssh -p 25025 -o StrictHostKeyChecking=no \
-            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} bash -lc '
-            echo "log in success" 
-
-              # Ensure target directory exists
-              sudo mkdir /var/www/html/laravel-demo
-              sudo chown  -R $SERVER_USER:$SERVER_USER /var/www/html/laravel-demo
-              sudo chmod 0777 /var/www/html/laravel-demo
-              cd /var/www/html/laravel-demo || { echo "Directory missing"; exit 1; }
-
-              
-              if [ -d ".git" ]; then
-                echo "Updating existing repo..."
-                git reset --hard
-                git pull origin main
-              else
-                echo "Cloning repo for the first time..."
-                git clone https://github.com/hardik17tech/laravel-demo-ci-cd.git .
-              fi
-              
-              echo "Installing PHP dependencies..."
-              composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader && \
-
-              echo "🛠 Running migrations & caching..."
-              php artisan migrate --force && \
-              php artisan config:cache && \
-              php artisan route:cache && \
-              php artisan view:cache && \
-
-              echo "Restarting PHP-FPM if available..."
-              sudo systemctl restart php8.3-fpm || true
-
-              echo "Deployment finished!"              
-            '
-
-
-      # - name: Deploy to Server
-        # run: |
-        #   sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /var/www/html/laravel-demo && git pull && php artisan migrate --force"
-
-
 # name: Demo Laravel App
 
 # on:
@@ -171,43 +104,119 @@ jobs:
 #           php-version: 8.2
 #           extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
 
-#       - name: Install Composer dependencies
-#         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+#       - name: Install sshpass
+#         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-#       - name: Build Frontend
-#         uses: actions/setup-node@v3
-#         with:
-#           node-version: 18
-#       - run: |
-#           npm install
-#           npm run build
-
-#       # Setup SSH private key
-#       - name: Setup SSH
+#       - name: Deploy to Server (SSH on port 25025)
 #         run: |
-#           mkdir -p ~/.ssh
-#           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
-#           chmod 600 ~/.ssh/id_ed25519
-#           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+#           sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
+#             ssh -p 25025 -o StrictHostKeyChecking=no \
+#             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} bash -lc '
+#             echo "log in success" 
 
-#       # Deploy to server
-#       - name: Deploy to Server
-#         run: |
-#           ssh -i ~/.ssh/id_ed25519 -o BatchMode=yes \
-#             ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} << 'EOF'
-#               cd /var/www/html/laravel-demo
+#               # Ensure target directory exists
+#               sudo mkdir /var/www/html/laravel-demo
+#               sudo chown  -R $SERVER_USER:$SERVER_USER /var/www/html/laravel-demo
+#               sudo chmod 0777 /var/www/html/laravel-demo
+#               cd /var/www/html/laravel-demo || { echo "Directory missing"; exit 1; }
 
-#               git pull origin main || true
-
-#               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
-
-#               if [ -f artisan ]; then
-#                 php artisan migrate --force || true
-#                 php artisan config:cache || true
-#                 php artisan route:cache || true
-#                 php artisan view:cache || true
+              
+#               if [ -d ".git" ]; then
+#                 echo "Updating existing repo..."
+#                 git reset --hard
+#                 git pull origin main
+#               else
+#                 echo "Cloning repo for the first time..."
+#                 git clone https://github.com/hardik17tech/laravel-demo-ci-cd.git .
 #               fi
+              
+#               echo "Installing PHP dependencies..."
+#               composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader && \
 
+#               echo "🛠 Running migrations & caching..."
+#               php artisan migrate --force && \
+#               php artisan config:cache && \
+#               php artisan route:cache && \
+#               php artisan view:cache && \
+
+#               echo "Restarting PHP-FPM if available..."
 #               sudo systemctl restart php8.3-fpm || true
-#           EOF
 
+#               echo "Deployment finished!"              
+#             '
+
+
+#       # - name: Deploy to Server
+#         # run: |
+#         #   sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p ${{ secrets.SERVER_PORT }} ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "cd /var/www/html/laravel-demo && git pull && php artisan migrate --force"
+
+name: Demo Laravel App
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Build Frontend
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: |
+          npm install
+          npm run build
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}            # Server SSH username
+          password: ${{ secrets.SERVER_PASSWORD }}           # Use GitHub secret here
+          port: 25025                 # Change if custom SSH port
+          script: |
+            echo "✅ Login successful"
+ 
+            cd /var/www/html/laravel-demo || { echo "❌ Directory missing"; exit 1; }
+            
+            echo "🔄 Updating existing repo..."
+            git reset --hard
+            git pull origin main
+            
+            echo "📥 Cloning repo for the first time..."
+            git clone https://github.com/hardik17tech/laravel-demo-ci-cd.git .
+            
+
+            # Always pull the latest changes (safe fallback)
+            git pull origin main || true
+
+            echo "📦 Installing dependencies..."
+            composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+            echo "🗑️ Clearing caches..."
+            php artisan cache:clear
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+
+            echo "⚡ Rebuilding caches..."
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            echo "🔁 Restarting PHP-FPM..."
+            sudo systemctl restart php8.3-fpm || true
