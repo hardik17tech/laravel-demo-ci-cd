@@ -110,7 +110,8 @@ jobs:
       - name: Deploy to Server (SSH on port 25025)
         run: |
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" \
-            ssh -p 25025 -o StrictHostKeyChecking=no dev@202.131.111.118 << 'EOF'
+            ssh -p 25025 -o StrictHostKeyChecking=no \
+            ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} bash -lc '
             echo "log in success" 
 
               # Ensure target directory exists
@@ -209,3 +210,4 @@ jobs:
 
 #               sudo systemctl restart php8.3-fpm || true
 #           EOF
+
