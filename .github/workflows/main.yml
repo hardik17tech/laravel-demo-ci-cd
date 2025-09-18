@@ -185,38 +185,38 @@ jobs:
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}            # Server SSH username
-          password: ${{ secrets.SERVER_PASSWORD }}           # Use GitHub secret here
-          port: 25025                 # Change if custom SSH port
+          username: ${{ secrets.SERVER_USER }}            
+          password: ${{ secrets.SERVER_PASSWORD }}          
+          port: 25025                 
           script: |
-            echo "✅ Login successful"
+            echo "Login successful"
  
-            cd /var/www/html/laravel-demo || { echo "❌ Directory missing"; exit 1; }
+            cd /var/www/html/laravel-demo || { echo "Directory missing"; exit 1; }
             
-            echo "🔄 Updating existing repo..."
+            echo "Updating existing repo..."
             git reset --hard
             git pull origin main
             
-            echo "📥 Cloning repo for the first time..."
+            echo "Cloning repo for the first time..."
             git clone https://github.com/hardik17tech/laravel-demo-ci-cd.git .
             
 
             # Always pull the latest changes (safe fallback)
             git pull origin main || true
 
-            echo "📦 Installing dependencies..."
+            echo "Installing dependencies..."
             composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
-            echo "🗑️ Clearing caches..."
+            echo "Clearing caches..."
             php artisan cache:clear
             php artisan config:clear
             php artisan route:clear
             php artisan view:clear
 
-            echo "⚡ Rebuilding caches..."
+            echo "Rebuilding caches..."
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
 
-            echo "🔁 Restarting PHP-FPM..."
+            echo "Restarting PHP-FPM..."
             sudo systemctl restart php8.3-fpm || true
