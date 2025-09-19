@@ -1,0 +1,60 @@
+
+name: Deploy to staging server
+
+on:
+  push:
+    branches:
+      - 'staggging_*'
+  workflow_dispatch:
+
+  
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.2
+          extensions: mbstring, bcmath, intl, pdo, tokenizer, xml
+
+      - name: Build Frontend
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: |
+          npm install
+          npm run build
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.2.0
+        with: 
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}            
+          password: ${{ secrets.SERVER_PASSWORD }}          
+          port: 25025                 
+          script: |
+            echo "Connected to staging server"
+ 
+            cd /var/www/html/laravel-demo || { echo "Directory missing"; exit 1; }
+            
+            echo "Updating existing repo..."
+            git reset --hard
+            git pull origin main
+            
+            echo "Clearing caches..."
+            php artisan cache:clear
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
+
+            echo "Restarting PHP-FPM..."
+            sudo systemctl restart php8.3-fpm || true
+
