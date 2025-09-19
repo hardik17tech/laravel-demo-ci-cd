@@ -41,15 +41,16 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}          
           port: 25025                 
           script: |
+            BRANCH_NAME=${{ github.ref_name }}
             echo "Connected to staging server"
  
             cd /var/www/html/laravel-demo || { echo "Directory missing"; exit 1; }
             
-            echo "Updating repo to match branch: $GITHUB_REF_NAME ..."
+            echo "Updating repo to match branch: $BRANCH_NAME ..."
             git fetch --all
             git reset --hard
-            git checkout $GITHUB_REF_NAME || git checkout -b $GITHUB_REF_NAME
-            git pull origin $GITHUB_REF_NAME
+            git checkout $BRANCH_NAME || git checkout -b $BRANCH_NAME
+            git pull origin $BRANCH_NAME
             
             echo "Clearing caches..."
             php artisan cache:clear
