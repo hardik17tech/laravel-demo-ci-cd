@@ -45,9 +45,11 @@ jobs:
  
             cd /var/www/html/laravel-demo || { echo "Directory missing"; exit 1; }
             
-            echo "Updating existing repo..."
+            echo "Updating repo to match branch: $GITHUB_REF_NAME ..."
+            git fetch --all
             git reset --hard
-            git pull origin main
+            git checkout $GITHUB_REF_NAME || git checkout -b $GITHUB_REF_NAME
+            git pull origin $GITHUB_REF_NAME
             
             echo "Clearing caches..."
             php artisan cache:clear
@@ -57,4 +59,6 @@ jobs:
 
             echo "Restarting PHP-FPM..."
             sudo systemctl restart php8.3-fpm || true
+
+            echo "Deployment complete for branch $GITHUB_REF_NAME"
 
