@@ -5,7 +5,7 @@ use App\Http\Controllers\WelcomeController;
 
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('welcome to Befree');
 });
 
 Route::get('/welcome', [WelcomeController::class, 'index']);
